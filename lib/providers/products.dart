@@ -1,16 +1,15 @@
 import 'package:flutter/foundation.dart';
-import 'package:shop_app/models/product.dart';
+import 'package:shop_app/providers/product.dart';
 
-class ProductProvider with ChangeNotifier {
-  List<Product> _products = [
+class Products with ChangeNotifier {
+  List<Product> _items = [
     Product(
-      id: 'p1',
-      title: 'Red Shirt',
-      description: 'A red shirt - it is pretty red!',
-      price: 29.99,
-      imageUrl:
-          'https://cdn.pixabay.com/photo/2016/10/02/22/17/red-t-shirt-1710578_1280.jpg',
-    ),
+        id: 'p1',
+        title: 'Red Shirt',
+        description: 'A red shirt - it is pretty red!',
+        price: 29.99,
+        imageUrl:
+            'https://cdn.pixabay.com/photo/2016/10/02/22/17/red-t-shirt-1710578_1280.jpg'),
     Product(
       id: 'p2',
       title: 'Trousers',
@@ -37,12 +36,20 @@ class ProductProvider with ChangeNotifier {
     ),
   ];
 
-  List<Product> get products {
-    return [..._products];
+  List<Product> get items {
+    return [..._items];
+  }
+
+  List<Product> get favoriteItems {
+    return _items.where((p) => p.isFavorite).toList();
+  }
+
+  Product findById(String id) {
+    return _items.firstWhere((p) => p.id == id);
   }
 
   void addProduct(Product product) {
-    _products.add(product);
+    _items.add(product);
     notifyListeners();
   }
 }
