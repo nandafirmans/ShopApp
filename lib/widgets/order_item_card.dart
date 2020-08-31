@@ -21,7 +21,7 @@ class _OrderItemCardState extends State<OrderItemCard> {
     return Container(
       decoration: BoxDecoration(
         border: Border(
-          bottom: BorderSide(
+          top: BorderSide(
             width: 1,
             color: Colors.black12,
           ),
@@ -79,24 +79,9 @@ class _OrderItemCardState extends State<OrderItemCard> {
             ),
           ),
           if (_isExpanded)
-            Container(
-              width: double.infinity,
-              height: min(widget.order.products.length * 40.0, 180),
-              child: Column(
-                children: <Widget>[
-                  Divider(
-                    height: 1,
-                    thickness: 1,
-                  ),
-                  Expanded(
-                    child: ListView(
-                      children:
-                          widget.order.products.map(_buildProductList).toList(),
-                    ),
-                  ),
-                ],
-              ),
-            )
+            Column(
+              children: widget.order.products.map(_buildProductList).toList(),
+            ),
         ],
       ),
     );
