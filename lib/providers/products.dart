@@ -1,40 +1,13 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart';
 import 'package:shop_app/providers/product.dart';
+import 'package:shop_app/utilities/api_url.dart';
 
 class Products with ChangeNotifier {
-  List<Product> _items = [
-    Product(
-        id: 'p1',
-        title: 'Red Shirt',
-        description: 'A red shirt - it is pretty red!',
-        price: 29.99,
-        imageUrl:
-            'https://cdn.pixabay.com/photo/2016/10/02/22/17/red-t-shirt-1710578_1280.jpg'),
-    Product(
-      id: 'p2',
-      title: 'Trousers',
-      description: 'A nice pair of trousers.',
-      price: 59.99,
-      imageUrl:
-          'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Trousers%2C_dress_%28AM_1960.022-8%29.jpg/512px-Trousers%2C_dress_%28AM_1960.022-8%29.jpg',
-    ),
-    Product(
-      id: 'p3',
-      title: 'Yellow Scarf',
-      description: 'Warm and cozy - exactly what you need for the winter.',
-      price: 19.99,
-      imageUrl:
-          'https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg',
-    ),
-    Product(
-      id: 'p4',
-      title: 'A Pan',
-      description: 'Prepare any meal you want.',
-      price: 49.99,
-      imageUrl:
-          'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg',
-    ),
-  ];
+  List<Product> _items = [];
 
   List<Product> get items {
     return [..._items];
@@ -52,9 +25,38 @@ class Products with ChangeNotifier {
     return _items.firstWhere((p) => p.id == id);
   }
 
-  void addProduct(Product product) {
+  Future<void> fetchAndSetProducts() async {
+    final response = await get(ApiUrl.products);
+    final Map<String, dynamic> responseBody = json.decode(response.body);
+    final List<Product> loadedProducts = responseBody.entries
+        .map(
+          (entry) => Product(
+            id: entry.key,
+            title: entry.value['title'],
+            description: entry.value['description'],
+            imageUrl: entry.value['imageUrl'],
+            price: entry.value['price'],
+            isFavorite: entry.value['isFavorite'],
+          ),
+        )
+        .toList();
+
+    _items = loadedProducts;
+    notifyListeners();
+  }
+
+  Future<void> addProduct(Product product) async {
+    final body = json.encode({
+      'title': product.title,
+      'description': product.description,
+      'imageUrl': product.imageUrl,
+      'price': product.price,
+      'isFavorite': product.isFavorite,
+    });
+    final response = await post(ApiUrl.products, body: body);
+    final responseBody = json.decode(response.body);
     final newProduct = Product(
-      id: DateTime.now().toString(),
+      id: responseBody['name'],
       title: product.title,
       description: product.description,
       imageUrl: product.imageUrl,
@@ -65,17 +67,33 @@ class Products with ChangeNotifier {
     notifyListeners();
   }
 
-  void updateProduct(Product updatedProduct) {
-    final productIndex = _items.indexWhere((p) => p.id == updatedProduct.id);
+  Future<void> updateProduct(Product product) async {
+    final productIndex = _items.indexWhere((p) => p.id == product.id);
 
     if (productIndex >= 0) {
-      _items[productIndex] = updatedProduct;
+      final body = json.encode({
+        'title': product.title,
+        'description': product.description,
+        'imageUrl': product.imageUrl,
+        'price': product.price,
+      });
+      await patch(ApiUrl.product(product.id), body: body);
+      _items[productIndex] = product;
       notifyListeners();
     }
   }
 
-  void removeProduct(String id) {
-    _items.removeWhere((element) => element.id == id);
-    notifyListeners();
+  Future<void> removeProduct(String id) async {
+    final deletedProductIndex = _items.indexWhere((el) => el.id == id);
+    final response = await delete(ApiUrl.product(id));
+
+    if (response.statusCode == 200) {
+      _items.removeAt(deletedProductIndex);
+      notifyListeners();
+    }
+
+    if (response.statusCode >= 400) {
+      throw HttpException('Could not delete product.');
+    }
   }
 }
