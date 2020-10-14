@@ -1,10 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shop_app/providers/carts.dart';
 import 'package:shop_app/providers/products.dart';
-import 'package:shop_app/screens/cart_screen.dart';
+import 'package:shop_app/utilities/dialogs.dart';
+import 'package:shop_app/widgets/app_bar_cart_badge.dart';
 import 'package:shop_app/widgets/app_drawer.dart';
-import 'package:shop_app/widgets/badge.dart';
 import 'package:shop_app/widgets/products_grid.dart';
 
 enum FilterOption { Favorites, All }
@@ -26,7 +27,15 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
     context
         .read<Products>()
         .fetchAndSetProducts()
-        .whenComplete(() => setState(() => _isLoading = false));
+        .whenComplete(() => setState(() => _isLoading = false))
+        .catchError(
+          (error) => Dialogs.showAlertDialog(
+            context: context,
+            message: (error is HttpException)
+                ? error.message
+                : 'an unknown error occurred',
+          ),
+        );
     super.initState();
   }
 
@@ -54,18 +63,7 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
               )
             ],
           ),
-          Consumer<Carts>(
-            builder: (_, cart, child) => Badge(
-              child: child,
-              value: cart.itemsLength.toString(),
-            ),
-            child: IconButton(
-              icon: Icon(Icons.shopping_cart),
-              onPressed: () {
-                Navigator.of(context).pushNamed(CartScreen.routeName);
-              },
-            ),
-          )
+          AppBarCartBadge()
         ],
       ),
       drawer: AppDrawer(),

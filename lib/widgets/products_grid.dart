@@ -20,7 +20,9 @@ class ProductsGrid extends StatelessWidget {
     if (productsFiltered.isEmpty) {
       return Center(
         child: Text(
-          'There\'s no favorite products. \n Start adding some!',
+          products.items.isEmpty
+              ? 'There\'s no products'
+              : 'There\'s no favorite products. \n Start adding some!',
           textAlign: TextAlign.center,
         ),
       );
@@ -30,7 +32,7 @@ class ProductsGrid extends StatelessWidget {
       padding: const EdgeInsets.all(10),
       itemCount: productsFiltered.length,
 
-      // add notifier provider here to passing product data.
+      // add changeNotifierProvider here to passing product data.
       // the passed data would become reactive when the data change-
       // it would automatically rebuild the widget.
 

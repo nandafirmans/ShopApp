@@ -1,16 +1,19 @@
 class ApiUrl {
   static const _apiHost = 'https://flutter-shop-app-44b4c.firebaseio.com';
-  static const products = '$_apiHost/products.json';
-  static const orders = '$_apiHost/orders.json';
+  static const _products = '$_apiHost/products';
+  static const _orders = '$_apiHost/orders';
 
-  static String product(String id) => _insertId(products, id);
-
-  static String order(String id) => _insertId(orders, id);
-
-  static String _insertId(String basePath, String id) {
-    final dotJsonIndex = basePath.lastIndexOf('.json');
-    return basePath.substring(0, dotJsonIndex) +
-        id +
-        basePath.substring(dotJsonIndex);
+  static String get products {
+    return _appendDotJson(_products);
   }
+
+  static String get orders {
+    return _appendDotJson(_orders);
+  }
+
+  static String product(String id) => _appendDotJson('$_products/$id');
+
+  static String order(String id) => _appendDotJson('$_orders/$id');
+
+  static String _appendDotJson(String url) => '$url.json';
 }

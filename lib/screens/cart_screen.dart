@@ -2,8 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shop_app/providers/carts.dart';
-import 'package:shop_app/providers/orders.dart';
 import 'package:shop_app/widgets/cart_item_card.dart';
+import 'package:shop_app/widgets/cart_order_card.dart';
 
 class CartScreen extends StatelessWidget {
   static const routeName = "/cart";
@@ -18,53 +18,7 @@ class CartScreen extends StatelessWidget {
       ),
       body: Column(
         children: <Widget>[
-          ...[Card(), Card()],
-          Card(
-            margin: EdgeInsets.all(15),
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: 15,
-                vertical: 8,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Text(
-                    'Total',
-                    style: TextStyle(
-                      fontSize: 21,
-                    ),
-                  ),
-                  Container(
-                    child: Row(
-                      children: <Widget>[
-                        Text(
-                          '\$${cart.totalAmount.toStringAsFixed(2)}',
-                          style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.amber),
-                        ),
-                        SizedBox(
-                          width: 15,
-                        ),
-                        FlatButton(
-                          child: Text('Order Now'),
-                          onPressed: () {
-                            context.read<Orders>().addOrder(cart.itemList);
-                            cart.clearCarts();
-                            Navigator.of(context).pop();
-                          },
-                          color: Theme.of(context).primaryColor,
-                          textColor: Colors.white,
-                        )
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            ),
-          ),
+          CartOrderCard(),
           Expanded(
             child: ListView.builder(
               itemCount: cart.itemList.length,

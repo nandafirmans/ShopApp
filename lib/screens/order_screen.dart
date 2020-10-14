@@ -7,10 +7,7 @@ import 'package:shop_app/widgets/order_item_card.dart';
 class OrderScreen extends StatelessWidget {
   static const routeName = "/OrderScreen";
 
-  @override
   Widget build(BuildContext context) {
-    final orders = context.watch<Orders>();
-
     return Scaffold(
       appBar: AppBar(
         title: Text('Order'),
@@ -20,11 +17,27 @@ class OrderScreen extends StatelessWidget {
         children: <Widget>[
           SizedBox(height: 8),
           Expanded(
-            child: ListView.builder(
-              itemCount: orders.items.length,
-              itemBuilder: (_, i) => OrderItemCard(
-                order: orders.items[i],
-              ),
+            child: FutureBuilder(
+              future: Provider.of<Orders>(context, listen: false)
+                  .fetchAndSetOrders(),
+              builder: (context, snapshot) =>
+                  snapshot.connectionState == ConnectionState.waiting
+                      ? Center(
+                          child: CircularProgressIndicator(),
+                        )
+                      : Consumer<Orders>(
+                          builder: (context, value, child) =>
+                              value.items.length <= 0
+                                  ? Center(
+                                      child: Text('There is no order items..'),
+                                    )
+                                  : ListView.builder(
+                                      itemCount: value.items.length,
+                                      itemBuilder: (_, i) => OrderItemCard(
+                                        order: value.items[i],
+                                      ),
+                                    ),
+                        ),
             ),
           ),
         ],

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shop_app/providers/product.dart';
 import 'package:shop_app/providers/products.dart';
-import 'package:shop_app/utilities/show_alert_dialog.dart';
+import 'package:shop_app/utilities/dialogs.dart';
 
 class EditProductScreen extends StatefulWidget {
   static const routeName = "/editProduct";
@@ -76,7 +76,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
           await context.read<Products>().addProduct(_editedProduct);
         }
       } catch (error) {
-        await showAlertDialog(
+        await Dialogs.showAlertDialog(
           context: context,
           title: 'An unknown error occurred',
           message: 'Something went wrong',
