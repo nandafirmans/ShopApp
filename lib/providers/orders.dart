@@ -8,12 +8,30 @@ import 'package:shop_app/models/order_item.dart';
 import 'package:shop_app/utilities/api_url.dart';
 
 class Orders with ChangeNotifier {
+  final String authToken;
+  final String userId;
   List<OrderItem> _items = [];
+
+  Orders({this.authToken, this.userId, Orders prevState}) {
+    if (prevState != null) {
+      _items = prevState._items;
+    }
+  }
 
   List<OrderItem> get items => [..._items];
 
   Future<void> fetchAndSetOrders() async {
-    final response = await get(ApiUrl.orders);
+    final response = await get(
+      ApiUrl.orders(
+        token: authToken,
+        userId: userId,
+      ),
+    );
+
+    if (response.statusCode >= 400) {
+      throw HttpException('Failed to fetch order list');
+    }
+
     final Map<String, dynamic> responseBody = json.decode(response.body);
     final List<OrderItem> results = responseBody == null
         ? []
@@ -31,8 +49,12 @@ class Orders with ChangeNotifier {
                           ))
                       .toList(),
                 ))
-            .toList();
-    results.sort((a, b) => b.dateTime.compareTo(a.dateTime));
+            .toList()
+      ..sort((a, b) => b.dateTime.compareTo(a.dateTime));
+
+    // dengan .. operator jadi lebih simple ndak perlu dibuat begini
+    // results.sort((a, b) => b.dateTime.compareTo(a.dateTime))
+
     _items = results;
     notifyListeners();
   }
@@ -57,7 +79,14 @@ class Orders with ChangeNotifier {
           )
           .toList(),
     });
-    final response = await post(ApiUrl.orders, body: body);
+
+    final response = await post(
+      ApiUrl.orders(
+        userId: userId,
+        token: authToken,
+      ),
+      body: body,
+    );
 
     if (response.statusCode >= 400) {
       throw HttpException('Can\'t adding orders');

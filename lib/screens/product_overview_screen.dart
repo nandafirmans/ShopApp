@@ -29,13 +29,16 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
         .fetchAndSetProducts()
         .whenComplete(() => setState(() => _isLoading = false))
         .catchError(
-          (error) => Dialogs.showAlertDialog(
-            context: context,
-            message: (error is HttpException)
-                ? error.message
-                : 'an unknown error occurred',
-          ),
+      (error) {
+        print(error);
+        return Dialogs.showAlertDialog(
+          context: context,
+          message: (error is HttpException)
+              ? error.message
+              : 'an unknown error occurred',
         );
+      },
+    );
     super.initState();
   }
 

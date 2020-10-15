@@ -22,15 +22,18 @@ class Product with ChangeNotifier {
     this.isFavorite = false,
   });
 
-  Future<void> toggleFavorite() async {
+  Future<void> toggleFavorite({String userId, String token}) async {
     isFavorite = !isFavorite;
     notifyListeners();
 
     try {
-      final url = ApiUrl.product(id);
-      final response = await patch(
-        url,
-        body: json.encode({'isFavorite': isFavorite}),
+      final response = await put(
+        ApiUrl.getUserFavoriteProductUrl(
+          productId: id,
+          userId: userId,
+          token: token,
+        ),
+        body: json.encode(isFavorite),
       );
       if (response.statusCode >= 400) {
         throw HttpException('Failed to toggle favorite');
