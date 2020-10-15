@@ -14,7 +14,8 @@ class OrderItemCard extends StatefulWidget {
   _OrderItemCardState createState() => _OrderItemCardState();
 }
 
-class _OrderItemCardState extends State<OrderItemCard> {
+class _OrderItemCardState extends State<OrderItemCard>
+    with SingleTickerProviderStateMixin {
   var _isExpanded = false;
 
   Widget _buildProductList(CartItem p) {
@@ -62,27 +63,42 @@ class _OrderItemCardState extends State<OrderItemCard> {
         horizontal: 15,
         vertical: 8,
       ),
-      child: Column(
-        children: <Widget>[
-          ListTile(
-            title: Text('\$${widget.order.amount}'),
-            subtitle: Text(
-              DateFormat('dd MM yyyy hh:mm').format(widget.order.dateTime),
-            ),
-            trailing: IconButton(
-              icon: Icon(
-                _isExpanded ? Icons.expand_less : Icons.expand_more,
+      child: InkWell(
+        onTap: () => setState(() {
+          _isExpanded = !_isExpanded;
+        }),
+        child: Column(
+          children: <Widget>[
+            ListTile(
+              title: Text('\$${widget.order.amount}'),
+              subtitle: Text(
+                DateFormat('dd MM yyyy hh:mm').format(widget.order.dateTime),
               ),
-              onPressed: () => setState(() {
-                _isExpanded = !_isExpanded;
-              }),
+              trailing: AnimatedContainer(
+                duration: Duration(milliseconds: 300),
+                curve: Curves.fastOutSlowIn,
+                transform: _isExpanded
+                    ? (Matrix4.rotationX(9.6)..translate(0.0, -20.0))
+                    : Matrix4.identity(),
+                child: const Icon(Icons.expand_more),
+              ),
             ),
-          ),
-          if (_isExpanded)
-            Column(
-              children: widget.order.products.map(_buildProductList).toList(),
+            AnimatedSize(
+              vsync: this,
+              duration: Duration(milliseconds: 300),
+              curve: Curves.fastOutSlowIn,
+              child: Container(
+                child: _isExpanded
+                    ? Column(
+                        children: widget.order.products
+                            .map(_buildProductList)
+                            .toList(),
+                      )
+                    : null,
+              ),
             ),
-        ],
+          ],
+        ),
       ),
     );
   }
